@@ -1,0 +1,5 @@
+Flask
+pytest
+ffmpeg-normalize
+colorlog
+python-dotenv
