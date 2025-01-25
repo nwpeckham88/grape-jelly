@@ -10,13 +10,37 @@ class GrapeJelly:
     def __init__(self, directories):
         self.directories = directories
         self.observer = Observer()
-        self.audio_codec = os.getenv('AUDIO_CODEC', 'aac')
-        self.audio_bitrate = os.getenv('AUDIO_BITRATE', '192k')
+        self.audio_codec = os.getenv('AUDIO_CODEC', 'eac3')
+        self.audio_bitrate = os.getenv('AUDIO_BITRATE', '256k')
         self.sample_rate = os.getenv('SAMPLE_RATE', '48000')
-        self.loudness_target = os.getenv('LOUDNESS_TARGET', '-24.0')
+        self.loudness_target = os.getenv('LOUDNESS_TARGET', '-23.0')
         self.true_peak = os.getenv('TRUE_PEAK', '-2.0')
         self.loudness_range_target = os.getenv('LOUDNESS_RANGE_TARGET', '7.0')
-        self.video_codec = os.getenv('VIDEO_CODEC', 'libx264')
+        self.video_codec = os.getenv('VIDEO_CODEC', 'copy')
+        self.file_extensions = os.getenv('FILE_EXTENSIONS', '.mp4,.mkv,.avi').split(',')
+        self.file_extensions.append('.grapejelly')
+        self.force = os.getenv('FORCE', 'false').lower() == 'true'
+        self.debug = os.getenv('DEBUG', 'false').lower() == 'true'
+        self.verbose = os.getenv('VERBOSE', 'false').lower() == 'true'
+        self.quiet = os.getenv('QUIET', 'false').lower() == 'true'
+        self.dry_run = os.getenv('DRY_RUN', 'false').lower() == 'true'
+        self.progress = os.getenv('PROGRESS', 'true').lower() == 'true'
+        self.normalization_type = os.getenv('NORMALIZATION_TYPE', 'ebu')
+        self.print_stats = os.getenv('PRINT_STATS', 'true').lower() == 'true'
+        self.keep_loudness_range_target = os.getenv('KEEP_LOUDNESS_RANGE_TARGET', 'false').lower() == 'true'
+        self.keep_lra_above_loudness_range_target = os.getenv('KEEP_LRA_ABOVE_LOUDNESS_RANGE_TARGET', 'false').lower() == 'true'
+        self.offset = float(os.getenv('OFFSET', '0.0'))
+        self.lower_only = os.getenv('LOWER_ONLY', 'false').lower() == 'true'
+        self.auto_lower_loudness_target = os.getenv('AUTO_LOWER_LOUDNESS_TARGET', 'false').lower() == 'true'
+        self.dual_mono = os.getenv('DUAL_MONO', 'false').lower() == 'true'
+        self.dynamic = os.getenv('DYNAMIC', 'false').lower() == 'true'
+        self.keep_original_audio = os.getenv('KEEP_ORIGINAL_AUDIO', 'false').lower() == 'true'
+        self.pre_filter = os.getenv('PRE_FILTER', '')
+        self.post_filter = os.getenv('POST_FILTER', '')
+        self.video_disable = os.getenv('VIDEO_DISABLE', 'false').lower() == 'true'
+        self.subtitle_disable = os.getenv('SUBTITLE_DISABLE', 'false').lower() == 'true'
+        self.metadata_disable = os.getenv('METADATA_DISABLE', 'false').lower() == 'true'
+        self.chapters_disable = os.getenv('CHAPTERS_DISABLE', 'false').lower() == 'true'
         self.processed_files = self.load_state()
 
     def load_state(self):
@@ -78,7 +102,28 @@ class GrapeJelly:
             true_peak=self.true_peak,
             loudness_range_target=self.loudness_range_target,
             video_codec=self.video_codec,
-            post_filter="speechnorm=e=6.25:r=0.00001:l=1"
+            force=self.force,
+            debug=self.debug,
+            verbose=self.verbose,
+            quiet=self.quiet,
+            dry_run=self.dry_run,
+            progress=self.progress,
+            normalization_type=self.normalization_type,
+            print_stats=self.print_stats,
+            keep_loudness_range_target=self.keep_loudness_range_target,
+            keep_lra_above_loudness_range_target=self.keep_lra_above_loudness_range_target,
+            offset=self.offset,
+            lower_only=self.lower_only,
+            auto_lower_loudness_target=self.auto_lower_loudness_target,
+            dual_mono=self.dual_mono,
+            dynamic=self.dynamic,
+            keep_original_audio=self.keep_original_audio,
+            pre_filter=self.pre_filter,
+            post_filter=self.post_filter,
+            video_disable=self.video_disable,
+            subtitle_disable=self.subtitle_disable,
+            metadata_disable=self.metadata_disable,
+            chapters_disable=self.chapters_disable
         )
         normalizer.add_media_file(file_path)
         output_path = file_path
@@ -108,7 +153,7 @@ class Handler(FileSystemEventHandler):
         self.grape_jelly = grape_jelly
 
     def on_created(self, event):
-        if not event.is_directory and event.src_path.endswith(('.mp4', '.mkv', '.avi')):
+        if not event.is_directory and any(event.src_path.endswith(ext) for ext in self.grape_jelly.file_extensions):
             self.grape_jelly.normalize_audio(event.src_path)
 
 if __name__ == "__main__":
