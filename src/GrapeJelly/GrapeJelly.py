@@ -8,6 +8,13 @@ class GrapeJelly:
     def __init__(self, directories):
         self.directories = directories
         self.observer = Observer()
+        self.audio_codec = os.getenv('AUDIO_CODEC', 'aac')
+        self.audio_bitrate = os.getenv('AUDIO_BITRATE', '192k')
+        self.sample_rate = os.getenv('SAMPLE_RATE', '48000')
+        self.loudness_target = os.getenv('LOUDNESS_TARGET', '-24.0')
+        self.true_peak = os.getenv('TRUE_PEAK', '-2.0')
+        self.loudness_range_target = os.getenv('LOUDNESS_RANGE_TARGET', '7.0')
+        self.video_codec = os.getenv('VIDEO_CODEC', 'libx264')
 
     def run(self):
         event_handler = Handler()
@@ -23,10 +30,14 @@ class GrapeJelly:
 
     def normalize_audio(self, file_path):
         normalizer = FFmpegNormalize(
-            audio_codec=os.getenv('AUDIO_CODEC', 'aac'),
-            audio_bitrate=os.getenv('AUDIO_BITRATE', '192k'),
-            sample_rate=os.getenv('SAMPLE_RATE', '48000'),
-            loudness_target=os.getenv('LOUDNESS_TARGET', '-24.0')
+            audio_codec=self.audio_codec,
+            audio_bitrate=self.audio_bitrate,
+            sample_rate=self.sample_rate,
+            loudness_target=self.loudness_target,
+            true_peak=self.true_peak,
+            loudness_range_target=self.loudness_range_target,
+            video_codec=self.video_codec,
+            post_filter="speechnorm=e=6.25:r=0.00001:l=1"
         )
         normalizer.add_media_file(file_path)
         output_path = f"{file_path}.normalized.json"

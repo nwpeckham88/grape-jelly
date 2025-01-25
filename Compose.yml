@@ -6,5 +6,5 @@ services:
     env_file:
       - .env
     volumes:
-      - ./src:/app/src
+      - $PWD:/process
     command: python3 src/main.py
