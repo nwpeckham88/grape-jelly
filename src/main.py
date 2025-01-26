@@ -1,12 +1,12 @@
 import os
 
 def main():
-    from GrapeJelly.GrapeJelly import GrapeJelly
+    from JellyJam.JellyJam import JellyJam
 
-    # Create an instance of GrapeJelly
+    # Create an instance of JellyJam
     directories_to_watch = os.getenv('DIRECTORIES_TO_WATCH', 'path/to/your/directory').split(',')
-    grapeJelly = GrapeJelly(directories_to_watch)
-    grapeJelly.run()
+    jellyJam = JellyJam(directories_to_watch)
+    jellyJam.run()
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,6 @@
-# Grape Jelly
+# Jelly Jam
 
-Grape Jelly is a Python application that monitors directories for new video files and normalizes their audio using FFmpeg. The application uses environment variables for configuration and can be run in a Docker container.
+Jelly Jam is a Python application that monitors directories for new video files and normalizes their audio using FFmpeg. The application uses environment variables for configuration and can be run in a Docker container.
 
 ## Features
 
@@ -19,8 +19,8 @@ Grape Jelly is a Python application that monitors directories for new video file
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/yourusername/grape-jelly.git
-    cd grape-jelly
+    git clone https://github.com/yourusername/jelly-jam.git
+    cd jelly-jam
     ```
 
 2. Create a virtual environment and install dependencies:

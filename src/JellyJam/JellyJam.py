@@ -7,7 +7,7 @@ from ffmpeg_normalize import FFmpegNormalize
 from prettytable import PrettyTable
 import ffmpeg
 
-class GrapeJelly:
+class JellyJam:
     def __init__(self, directories):
         self.directories = directories
         self.observer = Observer()
@@ -19,7 +19,7 @@ class GrapeJelly:
         self.loudness_range_target = os.getenv('LOUDNESS_RANGE_TARGET', '7.0')
         self.video_codec = os.getenv('VIDEO_CODEC', 'copy')
         self.file_extensions = os.getenv('FILE_EXTENSIONS', '.mp4,.mkv,.avi').split(',')
-        self.file_extensions.append('.grapejelly')
+        self.file_extensions.append('.jellyjam')
         self.force = os.getenv('FORCE', 'false').lower() == 'true'
         self.debug = os.getenv('DEBUG', 'false').lower() == 'true'
         self.verbose = os.getenv('VERBOSE', 'false').lower() == 'true'
@@ -49,13 +49,13 @@ class GrapeJelly:
         for directory in self.directories:
             for root, _, files in os.walk(directory):
                 for file in files:
-                    if file.endswith('.grapejelly'):
+                    if file.endswith('.jellyjam'):
                         with open(os.path.join(root, file), 'r') as f:
                             processed_files[file[:-10]] = json.load(f)
         return processed_files
 
     def save_state(self, file_path, state):
-        state_file = f"{file_path}.grapejelly"
+        state_file = f"{file_path}.jellyjam"
         with open(state_file, 'w') as f:
             json.dump(state, f)
 
@@ -72,7 +72,7 @@ class GrapeJelly:
         self.observer.join()
 
     def normalize_audio(self, file_path):
-        state_file = f"{file_path}.grapejelly"
+        state_file = f"{file_path}.jellyjam"
         if os.path.exists(state_file):
             with open(state_file, 'r') as f:
                 state = json.load(f)
@@ -195,14 +195,14 @@ class GrapeJelly:
         return results
 
 class Handler(FileSystemEventHandler):
-    def __init__(self, grape_jelly):
-        self.grape_jelly = grape_jelly
+    def __init__(self, jelly_jam):
+        self.jelly_jam = jelly_jam
 
     def on_created(self, event):
-        if not event.is_directory and any(event.src_path.endswith(ext) for ext in self.grape_jelly.file_extensions):
-            self.grape_jelly.normalize_audio(event.src_path)
+        if not event.is_directory and any(event.src_path.endswith(ext) for ext in self.jelly_jam.file_extensions):
+            self.jelly_jam.normalize_audio(event.src_path)
 
 if __name__ == "__main__":
     directories_to_watch = os.getenv('DIRECTORIES_TO_WATCH', 'path/to/your/directory').split(',')
-    grape_jelly = GrapeJelly(directories_to_watch)
-    grape_jelly.run()
+    jelly_jam = JellyJam(directories_to_watch)
+    jelly_jam.run()
