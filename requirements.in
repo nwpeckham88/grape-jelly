@@ -1,5 +1,6 @@
 Flask
 pytest
 ffmpeg-normalize
+ffmpeg-python
 colorlog
 python-dotenv
