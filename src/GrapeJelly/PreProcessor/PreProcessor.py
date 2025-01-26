@@ -1,6 +1,6 @@
 import os
 import ffmpeg
-from ffmpeg_normalize import SubtitleStream, VideoStream, AudioStream
+from ffmpeg_normalize import FFmpegNormalize, SubtitleStream, VideoStream, AudioStream
 
 class PreProcessor:
     def __init__(self):
@@ -117,7 +117,30 @@ class PreProcessor:
         }
         return analysis_results
 
+    def create_ffmpeg_normalize_config(self, input_file):
+        """
+        Create a configuration object for ffmpeg-normalize based on the analysis results.
+        
+        Args:
+            input_file (str): The path to the input file.
+        
+        Returns:
+            dict: A configuration object for ffmpeg-normalize.
+        """
+        analysis_results = self.analyze_file(input_file)
+        streams = analysis_results['streams']
+        volumedetect_results = analysis_results['volumedetect']
+        
+        config = {
+            'input_file': input_file,
+            'streams': streams,
+            'volumedetect': volumedetect_results,
+            # Add more configuration options here if needed
+        }
+        
+        return config
+
 # Example usage:
 # preprocessor = PreProcessor()
-# results = preprocessor.analyze_file('path/to/your/file.mp4')
-# print(results)
+# config = preprocessor.create_ffmpeg_normalize_config('path/to/your/file.mp4')
+# print(config)
