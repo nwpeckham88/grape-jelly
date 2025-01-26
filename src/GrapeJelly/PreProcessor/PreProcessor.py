@@ -140,7 +140,72 @@ class PreProcessor:
         
         return config
 
+    def run_ebu_r128(self, input_file, video=0, size='640x480', meter=9, metadata=0, framelog='info', peak='none', dualmono=False, panlaw=-3.01, target=-23, gauge='momentary', scale='absolute'):
+        """
+        Run EBU R128 scanner filter on the given input file.
+        
+        Args:
+            input_file (str): The path to the input file.
+            video (int): Activate the video output. Default is 0.
+            size (str): Set the video size. Default is '640x480'.
+            meter (int): Set the EBU scale meter. Default is 9.
+            metadata (int): Set metadata injection. Default is 0.
+            framelog (str): Force the frame logging level. Default is 'info'.
+            peak (str): Set peak mode(s). Default is 'none'.
+            dualmono (bool): Treat mono input files as "dual mono". Default is False.
+            panlaw (float): Set a specific pan law. Default is -3.01.
+            target (int): Set a specific target level in LUFS. Default is -23.
+            gauge (str): Set the value displayed by the gauge. Default is 'momentary'.
+            scale (str): Sets the display scale for the loudness. Default is 'absolute'.
+        
+        Returns:
+            dict: A dictionary containing the EBU R128 results.
+        """
+        try:
+            out, err = (
+                ffmpeg
+                .input(input_file)
+                .filter('ebur128', video=video, size=size, meter=meter, metadata=metadata, framelog=framelog, peak=peak, dualmono=dualmono, panlaw=panlaw, target=target, gauge=gauge, scale=scale)
+                .output('null', f='null')
+                .run(capture_stdout=True, capture_stderr=True)
+            )
+        except ffmpeg.Error as e:
+            raise RuntimeError(f"ffmpeg ebur128 failed: {e.stderr.decode()}")
+
+        ebur128_results = self.parse_ebu_r128_output(err.decode())
+        
+        return ebur128_results
+
+    def parse_ebu_r128_output(self, output):
+        """
+        Parse the output from ffmpeg ebur128.
+        
+        Args:
+            output (str): The stderr output from ffmpeg ebur128.
+        
+        Returns:
+            dict: A dictionary containing the parsed ebur128 results.
+        """
+        results = {}
+        for line in output.split('\n'):
+            if 'I:' in line:
+                results['integrated'] = float(line.split('I:')[1].strip().split()[0])
+            elif 'LRA:' in line:
+                results['range'] = float(line.split('LRA:')[1].strip().split()[0])
+            elif 'LRA low:' in line:
+                results['lra_low'] = float(line.split('LRA low:')[1].strip().split()[0])
+            elif 'LRA high:' in line:
+                results['lra_high'] = float(line.split('LRA high:')[1].strip().split()[0])
+            elif 'Sample peak:' in line:
+                results['sample_peak'] = float(line.split('Sample peak:')[1].strip().split()[0])
+            elif 'True peak:' in line:
+                results['true_peak'] = float(line.split('True peak:')[1].strip().split()[0])
+        
+        return results
+
 # Example usage:
 # preprocessor = PreProcessor()
 # config = preprocessor.create_ffmpeg_normalize_config('path/to/your/file.mp4')
 # print(config)
+# ebu_r128_results = preprocessor.run_ebu_r128('path/to/your/file.mp4')
+# print(ebu_r128_results)
